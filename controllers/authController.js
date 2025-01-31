@@ -3,6 +3,7 @@ const {
   generateAuthenticationUrl,
   auth,
 } = require("../services/googleApiAuthService");
+const tokenStore = require("../store/tokenStore");
 
 const authenticate = (req, res) => {
   try {
@@ -27,9 +28,9 @@ const callback = async (req, res) => {
     auth.setCredentials(tokens.tokens);
     await saveToken(tokens.tokens);
 
-    if (req.session) {
-      req.session.accessToken = tokens.tokens.access_token;
-      req.session.expiresIn = tokens.tokens.expiry_date;
+    if (tokenStore) {
+      tokenStore.accessToken = tokens.tokens.access_token;
+      tokenStore.expiresAt = tokens.tokens.expiry_date;
     } else {
       console.warn("Session is not initialized.");
     }
@@ -47,14 +48,14 @@ const callback = async (req, res) => {
 const automaticAuth = async (req, res) => {
   try {
     const tokens = await loadSavedToken();
-    if (tokens) {
-      req.session.accessToken = tokens.access_token;
-      req.session.expiresIn = tokens.expiry_date;
+    if (tokens && tokenStore) {
+      tokenStore.accessToken = tokens.access_token;
+      tokenStore.expiresAt = tokens.expiry_date;
       auth.setCredentials(tokens);
     } else {
       console.log("No valid token found.");
     }
-    const redirectUrl = req.session.originalUrl || "/status";
+    const redirectUrl = tokenStore.originalUrl || "/status";
     res.redirect(redirectUrl);
   } catch (error) {
     console.error("Authentication failed:", error);

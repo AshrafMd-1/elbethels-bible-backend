@@ -1,8 +1,14 @@
+const tokenStore = require("../store/tokenStore");
+
 function isAuthenticated(req, res, next) {
-  if (req.session.accessToken && req.session.expiresIn > Date.now()) {
+  if (
+    tokenStore &&
+    tokenStore.accessToken &&
+    tokenStore.expiresAt > Date.now()
+  ) {
     next();
   } else {
-    req.session.originalUrl = req.originalUrl;
+    tokenStore.originalUrl = req.originalUrl;
     res.redirect("/autoAuth");
   }
 }

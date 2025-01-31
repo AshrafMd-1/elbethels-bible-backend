@@ -1,4 +1,5 @@
 const os = require("os");
+const tokenStore = require("../store/tokenStore");
 
 const helloWorld = (req, res) => {
   res.status(200).send("Hello World!");
@@ -6,19 +7,23 @@ const helloWorld = (req, res) => {
 
 const status = (req, res) => {
   res.json({
-    date: new Date().toLocaleDateString(),
-    time: new Date().toLocaleTimeString(),
-    timezone: new Date().toLocaleTimeString("en-US", {
-      timeZone: "Asia/Kolkata",
-    }),
+    date: new Date().toLocaleDateString("en-IN"),
+    time: new Date().toLocaleTimeString("en-IN"),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     status: "Server is running",
-    authenticated: !!req.session.accessToken,
-    tokenExpireTime: req.session.expiresIn || null,
+    authenticated: !!tokenStore.accessToken,
+    tokenExpireTime: tokenStore.expiresAt
+      ? new Date(tokenStore.expiresAt).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        })
+      : null,
     systemInfo: {
       platform: os.platform(),
       architecture: os.arch(),
       freeMemory: `${Math.round(os.freemem() / (1024 * 1024))} MB`,
       totalMemory: `${Math.round(os.totalmem() / (1024 * 1024))} MB`,
+      cpuCount: os.cpus().length,
+      uptime: `${Math.floor(os.uptime() / 60)} minutes`,
     },
   });
 };
