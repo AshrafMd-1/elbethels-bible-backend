@@ -1,7 +1,6 @@
 const { google } = require("googleapis");
 const credentials = require("../config/credentials.json");
 const axios = require("axios");
-const { loadSavedToken } = require("../utils/googleAuth");
 
 const auth = new google.auth.OAuth2(
   credentials.web.client_id,

@@ -44,7 +44,7 @@ const callback = async (req, res) => {
   }
 };
 
-const refreshAuthToken = async (req, res) => {
+const automaticAuth = async (req, res) => {
   try {
     const tokens = await loadSavedToken();
     if (tokens) {
@@ -62,4 +62,4 @@ const refreshAuthToken = async (req, res) => {
   }
 };
 
-module.exports = { authenticate, callback, automaticAuth: refreshAuthToken };
+module.exports = { authenticate, callback, automaticAuth };

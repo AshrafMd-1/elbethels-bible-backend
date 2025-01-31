@@ -1,5 +1,3 @@
-const { auth } = require("../services/googleApiAuthService");
-
 function isAuthenticated(req, res, next) {
   if (req.session.accessToken && req.session.expiresIn > Date.now()) {
     next();
