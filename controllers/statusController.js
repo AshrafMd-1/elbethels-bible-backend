@@ -13,6 +13,7 @@ const status = (req, res) => {
     }),
     status: "Server is running",
     authenticated: !!req.session.accessToken,
+    tokenExpireTime: req.session.expiresIn || null,
     systemInfo: {
       platform: os.platform(),
       architecture: os.arch(),

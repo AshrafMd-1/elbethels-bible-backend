@@ -1,6 +1,7 @@
 const express = require("express");
 const statusRoutes = require("./routes/statusRoutes");
 const authRoutes = require("./routes/authRoutes");
+const fetchRoutes = require("./routes/fetchRoutes");
 require("dotenv").config();
 
 const port = process.env.PORT || 3000;
@@ -22,6 +23,7 @@ app.use(
 
 app.use("/", statusRoutes);
 app.use("/", authRoutes);
+app.use("/", fetchRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

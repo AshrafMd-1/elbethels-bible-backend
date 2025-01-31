@@ -1,4 +1,4 @@
-const { saveToken } = require("../utils/googleAuth");
+const { saveToken, loadSavedToken } = require("../utils/googleAuth");
 const {
   generateAuthenticationUrl,
   auth,
@@ -29,6 +29,7 @@ const callback = async (req, res) => {
 
     if (req.session) {
       req.session.accessToken = tokens.tokens.access_token;
+      req.session.expiresIn = tokens.tokens.expiry_date;
     } else {
       console.warn("Session is not initialized.");
     }
@@ -43,4 +44,22 @@ const callback = async (req, res) => {
   }
 };
 
-module.exports = { authenticate, callback };
+const refreshAuthToken = async (req, res) => {
+  try {
+    const tokens = await loadSavedToken();
+    if (tokens) {
+      req.session.accessToken = tokens.access_token;
+      req.session.expiresIn = tokens.expiry_date;
+      auth.setCredentials(tokens);
+    } else {
+      console.log("No valid token found.");
+    }
+    const redirectUrl = req.session.originalUrl || "/status";
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error("Authentication failed:", error);
+    res.status(500).send("Authentication failed.");
+  }
+};
+
+module.exports = { authenticate, callback, automaticAuth: refreshAuthToken };

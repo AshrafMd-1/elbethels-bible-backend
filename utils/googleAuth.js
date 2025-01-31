@@ -1,6 +1,9 @@
 const { google } = require("googleapis");
 const fs = require("fs");
-const { auth } = require("../services/googleApiAuthService");
+const {
+  auth,
+  refreshAccessToken,
+} = require("../services/googleApiAuthService");
 
 const tokenPath = "./config/token.json";
 
@@ -19,7 +22,31 @@ const loadSavedToken = async () => {
     await fs.promises.access(tokenPath, fs.constants.F_OK);
     const tokenFile = await fs.promises.readFile(tokenPath);
     const tokenData = JSON.parse(tokenFile);
-    return auth.fromJSON(tokenData);
+
+    if (tokenData.expiry_date < Date.now()) {
+      console.log("Token expired, refreshing...");
+
+      try {
+        const newTokenData = await refreshAccessToken(tokenData.refresh_token);
+        const tokenPayload = {
+          access_token: newTokenData.access_token,
+          refresh_token: tokenData.refresh_token || newTokenData.refresh_token,
+          expiry_date: newTokenData.expiry_date,
+          token_type: newTokenData.token_type,
+          scope: newTokenData.scope,
+        };
+
+        await saveToken(tokenPayload);
+        auth.setCredentials(tokenPayload);
+        return tokenPayload;
+      } catch (refreshError) {
+        console.error("Error refreshing token:", refreshError);
+        throw refreshError;
+      }
+    } else {
+      auth.setCredentials(tokenData);
+      return tokenData;
+    }
   } catch (error) {
     if (error.code === "ENOENT") {
       console.log("Token file not found, creating a new one.");
