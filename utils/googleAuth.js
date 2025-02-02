@@ -31,7 +31,7 @@ const loadSavedToken = async () => {
         const tokenPayload = {
           access_token: newTokenData.access_token,
           refresh_token: tokenData.refresh_token || newTokenData.refresh_token,
-          expiry_date: newTokenData.expiry_date,
+          expiry_date: new Date() + newTokenData.expires_in,
           token_type: newTokenData.token_type,
           scope: newTokenData.scope,
         };

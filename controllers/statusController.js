@@ -7,9 +7,20 @@ const helloWorld = (req, res) => {
 
 const status = (req, res) => {
   res.json({
-    date: new Date().toLocaleDateString("en-IN"),
-    time: new Date().toLocaleTimeString("en-IN"),
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    serverTime: {
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+    hyderabadTime: {
+      date: new Date().toLocaleDateString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      }),
+      time: new Date().toLocaleTimeString("en-IN", {
+        timeZone: "Asia/Kolkata",
+      }),
+      timezone: "Asia/Kolkata",
+    },
     status: "Server is running",
     authenticated: !!tokenStore.accessToken,
     tokenExpireTime: tokenStore.expiresAt
@@ -23,7 +34,8 @@ const status = (req, res) => {
       freeMemory: `${Math.round(os.freemem() / (1024 * 1024))} MB`,
       totalMemory: `${Math.round(os.totalmem() / (1024 * 1024))} MB`,
       cpuCount: os.cpus().length,
-      uptime: `${Math.floor(os.uptime() / 60)} minutes`,
+      serverUptime: `${Math.floor(os.uptime() / 60)} minutes`,
+      applicationUptime: `${Math.floor((new Date() - tokenStore.startTime) / 60000)} minutes`,
     },
   });
 };

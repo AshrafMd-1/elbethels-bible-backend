@@ -2,6 +2,7 @@ const express = require("express");
 const statusRoutes = require("./routes/statusRoutes");
 const authRoutes = require("./routes/authRoutes");
 const fetchRoutes = require("./routes/fetchRoutes");
+const tokenStore = require("./store/tokenStore");
 require("dotenv").config();
 
 const port = process.env.PORT || 3000;
@@ -16,6 +17,7 @@ app.use("/", fetchRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+  tokenStore.startTime = new Date();
 });
 
 module.exports = { app };
