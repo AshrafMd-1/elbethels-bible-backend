@@ -23,7 +23,7 @@ const loadSavedToken = async () => {
     const tokenFile = await fs.promises.readFile(tokenPath);
     const tokenData = JSON.parse(tokenFile);
 
-    if (tokenData.expiry_date < Date.now()) {
+    if (tokenData.expiry_date && tokenData.expiry_date < Date.now()) {
       console.log("Token expired, refreshing...");
 
       try {
