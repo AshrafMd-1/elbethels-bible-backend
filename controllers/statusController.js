@@ -27,7 +27,7 @@ const status = (req, res) => {
       ? new Date(tokenStore.expiresAt).toLocaleString("en-IN", {
           timeZone: "Asia/Kolkata",
         })
-      : null,
+      : "unAuthorized",
     systemInfo: {
       platform: os.platform(),
       architecture: os.arch(),
