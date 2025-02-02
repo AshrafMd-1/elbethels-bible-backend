@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "axios": "^1.7.9",
+    "diskusage": "^1.2.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "googleapis": "^144.0.0",
