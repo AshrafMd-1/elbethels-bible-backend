@@ -14,6 +14,15 @@ const fetchAudio = async (req, res) => {
       auth: auth,
     });
 
+    // Fetch file metadata to get the content length
+    const fileMetadata = await drive.files.get({
+      fileId: fileId,
+      fields: "size, mimeType",
+    });
+
+    const fileSize = fileMetadata.data.size;
+    const mimeType = fileMetadata.data.mimeType || "audio/mpeg";
+
     const response = await drive.files.get(
       {
         fileId: fileId,
@@ -22,7 +31,9 @@ const fetchAudio = async (req, res) => {
       { responseType: "stream" },
     );
 
-    res.setHeader("Content-Type", "audio/mpeg");
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Content-Length", fileSize);
+
     response.data.pipe(res);
   } catch (error) {
     console.error("Error fetching audio:", error);
