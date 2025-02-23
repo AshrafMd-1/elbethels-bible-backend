@@ -1,7 +1,6 @@
 const router = require("express").Router();
-const { fetchAudio } = require("../controllers/fetchController");
-const isAuthenticated = require("../middleware/middleware");
+const {fetchAudio} = require("../controllers/fetchController");
 
-router.get("/fetch/:fileId", isAuthenticated, fetchAudio);
+router.get("/fetch/:fileId", fetchAudio);
 
 module.exports = router;
