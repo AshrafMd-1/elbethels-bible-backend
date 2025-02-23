@@ -1,44 +1,56 @@
-const { google } = require("googleapis");
-const { auth } = require("../services/googleApiAuthService");
+const {google} = require("googleapis");
+const {auth} = require("../services/googleApiAuthService");
+const rangeParser = require("range-parser");
 
 const fetchAudio = async (req, res) => {
-  try {
-    const { fileId } = req.params;
+	try {
+		const {fileId} = req.params;
 
-    if (!fileId) {
-      return res.status(400).json({ error: "Missing fileId parameter" });
-    }
+		if (!fileId) {
+			return res.status(400).json({error: "Missing fileId parameter"});
+		}
 
-    const drive = google.drive({
-      version: "v3",
-      auth: auth,
-    });
+		const drive = google.drive({version: "v3", auth});
 
-    // Fetch file metadata to get the content length
-    const fileMetadata = await drive.files.get({
-      fileId: fileId,
-      fields: "size, mimeType",
-    });
+		const fileMetadata = await drive.files.get({
+			fileId,
+			fields: "size, mimeType",
+		});
 
-    const fileSize = fileMetadata.data.size;
-    const mimeType = fileMetadata.data.mimeType || "audio/mpeg";
+		const fileSize = parseInt(fileMetadata.data.size, 10);
+		const mimeType = fileMetadata.data.mimeType || "audio/mpeg";
 
-    const response = await drive.files.get(
-      {
-        fileId: fileId,
-        alt: "media",
-      },
-      { responseType: "stream" },
-    );
+		res.setHeader("Content-Type", mimeType);
+		res.setHeader("Accept-Ranges", "bytes");
 
-    res.setHeader("Content-Type", mimeType);
-    res.setHeader("Content-Length", fileSize);
+		const range = req.headers.range;
+		let start = 0;
+		let end = fileSize - 1;
 
-    response.data.pipe(res);
-  } catch (error) {
-    console.error("Error fetching audio:", error);
-    res.status(500).json({ error: "Failed to stream audio" });
-  }
+		if (range) {
+			const parsedRanges = rangeParser(fileSize, range);
+			if (parsedRanges !== -1 && parsedRanges !== -2) {
+				const {start: parsedStart, end: parsedEnd} = parsedRanges[0];
+				start = parsedStart;
+				end = parsedEnd;
+			}
+
+			res.status(206);
+			res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+		}
+
+		res.setHeader("Content-Length", end - start + 1);
+
+		const response = await drive.files.get(
+		  {fileId, alt: "media"},
+		  {responseType: "stream"}
+		);
+
+		response.data.pipe(res);
+	} catch (error) {
+		console.error("Error fetching audio:", error);
+		res.status(500).json({error: "Failed to stream audio"});
+	}
 };
 
-module.exports = { fetchAudio };
+module.exports = {fetchAudio};
